@@ -1,4 +1,3 @@
-use edit;
 use futures::{stream, StreamExt};
 use log::*;
 use openssh::*;
@@ -7,7 +6,6 @@ use std::io;
 use std::io::prelude::*;
 use std::process::Output;
 use std::time::Instant;
-use tokio;
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 
@@ -82,8 +80,8 @@ async fn run(host: &str, command: &str) -> Result<CmdRes, AppError> {
     debug!("[{}] connected", host);
     let now = Instant::now();
 
-    let res = if command.starts_with("edit ") {
-        edit_file(&session, &command[5..]).await?;
+    let res = if let Some(p) = command.strip_prefix("edit ") {
+        edit_file(&session, &p).await?;
         None
     } else {
         Some(match File::open(command) {
